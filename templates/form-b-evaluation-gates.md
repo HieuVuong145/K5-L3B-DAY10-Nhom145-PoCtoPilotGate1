@@ -81,26 +81,28 @@ Ba loại lỗi:
 
 | # | Lỗi: người ta thấy gì (dán dòng trace / sổ cái) | Ai gặp, ai chịu | Hệ trọng (thấp / cao) | Loại lỗi (giới hạn hệ thống / ngữ cảnh / chìm) |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
+| 1 | `T-002@55` · dòng 03 `model_override {db: 2, ticket: 5}` → dòng 05 `proposal {amount_vnd: 20000, delay_days_used: 5}` → dòng 06 `tool.issue_refund {amount_vnd: 20000}` → `SỔ CÁI` có dòng hoàn **20.000đ** cho O-1002, trong khi dòng 02 `tracking` ghi `db_delay_days: 2` và nhãn là `denied / 0đ`. | Khách C-02 nhận 20.000đ không đúng quyền lợi; LogiX (ngân sách hoàn tự động) mất tiền. Khách không biết là sai, hệ thống cũng không báo. | cao | **chìm** |
+| 2 | `T-002@55` · dòng 07 `tool.file_carrier_fault {carrier_id: VNX, parcel_id: O-1002-P1, delay_days: 5}` → `LỖI HÃNG` có bản ghi lỗi VNX; dòng 08 `notify_carrier ... delay_days: 5`. Tracking (dòng 02) ghi kiện đó trễ **2 ngày**, dưới ngưỡng `min_days_fee: 3` của REFUND-v3; nhãn `faults: []`. | Hãng VNX và tài xế TX-VNX-03 bị ghi lỗi oan → rủi ro xếp hạng/cắt hợp đồng. Họ không được hỏi, LogiX cũng không biết mình ghi sai. | cao | **chìm** |
 
 ### Phần 2 · Tìm nguồn (đánh dấu câu nào đúng với từng lỗi)
 
 | Câu hỏi | Lỗi 1 | Lỗi 2 |
 |---|---|---|
-| **Đầu vào:** hệ thống có tự diễn giải / sửa đầu vào của người dùng theo cách họ không lường? Có đặt sai trọng số cho một lời nói hay tín hiệu của người dùng? | | |
-| **Độ liên quan:** hệ thống có thiếu dữ liệu cần để quyết đúng? Dữ liệu vào có nhiễu, thiếu ổn định? | | |
-| **Thứ bậc hệ thống:** có hai hệ thống cùng ghi / cùng theo dõi một thứ mà không rõ bên nào là chủ (ví dụ CSKH hoàn tay và trợ lý cùng ghi sổ)? | | |
-| **Trạng thái hỏng:** nhiều lỗi cộng lại có làm tính năng không dùng được (ví dụ LLM lỗi liên tiếp)? | | |
+| **Đầu vào:** hệ thống có tự diễn giải / sửa đầu vào của người dùng theo cách họ không lường? Có đặt sai trọng số cho một lời nói hay tín hiệu của người dùng? | **Đúng** — dòng 01 `llm_extract {claimed_delay_days: 5, trust_claim: true}`; dòng 03 `model_override {db: 2, ticket: 5}`: model cho số khách tự khai trọng số cao hơn tracking DB. | **Đúng** — cùng con số 5 bị đè được dùng tiếp cho `do_fault` (dòng 05) rồi ghi vào bản ghi lỗi hãng (dòng 07–08). |
+| **Độ liên quan:** hệ thống có thiếu dữ liệu cần để quyết đúng? Dữ liệu vào có nhiễu, thiếu ổn định? | **Không** — DB có đủ: `tracking.db_delay_days = 2`, `delay_cause = CARRIER`. Lỗi không phải do thiếu dữ liệu. | **Không** — DB có đủ `parcel_id`, `carrier_id`, delay 2 ngày; không thiếu trường nào. |
+| **Thứ bậc hệ thống:** có hai hệ thống cùng ghi / cùng theo dõi một thứ mà không rõ bên nào là chủ (ví dụ CSKH hoàn tay và trợ lý cùng ghi sổ)? | **Không** — chỉ một hệ ghi sổ; nhưng thiếu **luật ưu tiên nguồn**: tracking là nguồn sự thật mà agent vẫn để ticket đè. | **Không** — chỉ một bản ghi lỗi; nhưng bản ghi lấy số của agent thay vì đối chiếu tracking (đây là chỗ đặt cổng ở B7.1). |
+| **Trạng thái hỏng:** nhiều lỗi cộng lại có làm tính năng không dùng được (ví dụ LLM lỗi liên tiếp)? | **Không** — một lỗi đơn lẻ ở seed 55, các seed khác đúng. | **Không** — không có chuỗi lỗi LLM trong ca này. |
 
 ### Phần 3 · Hướng xử lý (mỗi lỗi một ô)
 
 | | Lỗi 1 | Lỗi 2 |
 |---|---|---|
-| Vì sao người gặp coi đây là lỗi | | |
-| Kiểu giải pháp: phản hồi cho người dùng / trao quyền kiểm soát cho người / khác | | |
-| Đường đi của người sau khi có giải pháp (ví dụ: ticket chuyển sang người duyệt → duyệt → khách được trả lời) | | |
-| Hệ thống học được gì (tín hiệu ghi lại để theo dõi: tên metric trong `monitors.py`) | | |
+| Vì sao người gặp coi đây là lỗi | Khách được hoàn khoản chính sách **không** cho phép (trễ 2 < 3 ngày): LogiX mất tiền, sổ sai; nếu bị hỏi lại thì không có căn cứ chính sách để giải thích. | Sổ giao của hãng ghi 2 ngày nhưng bị ghi lỗi "trễ 5 ngày": hãng và tài xế bị oan, ảnh hưởng xếp hạng và hợp đồng. |
+| Kiểu giải pháp: phản hồi cho người dùng / trao quyền kiểm soát cho người / khác | **Khác**: cổng code ở tầng ghi — tính lại quyền lợi từ tracking + policy; lệch thì `modify`/`deny`, không cần người và không đẩy ca vào hàng chờ. | **Khác**: cổng code chỉ cho ghi khi tracking ghi nguyên nhân thuộc lỗi hãng **và** đủ ngưỡng trễ; sửa `delay_days` ghi sang hãng theo tracking; không đủ căn cứ thì deny và không `notify_carrier`. |
+| Đường đi của người sau khi có giải pháp (ví dụ: ticket chuyển sang người duyệt → duyệt → khách được trả lời) | Agent tính lại: quyền lợi = 0 → lệnh hoàn bị `deny` → khách nhận "yêu cầu bị từ chối, LogiX chưa hoàn khoản nào" → không có dòng sổ, không vào hàng chờ. | Agent gọi `file_carrier_fault` → cổng chặn vì tracking chỉ 2 ngày → không có bản ghi lỗi, không gửi thông báo hãng; khách vẫn được trả lời; hãng không bị ghi oan. |
+| Hệ thống học được gì (tín hiệu ghi lại để theo dõi: tên metric trong `monitors.py`) | `model_override_rate` + `gate_intervention_rate` (mới trong `lab10/monitors.py`); trace có `refund_clamped` và `gate` deny để đối soát. | `gate_intervention_rate`; trace có `carrier_fault_blocked` / `carrier_fault_delay_corrected` để đếm ca hãng bị ghi oan suýt xảy ra. |
+
+**Đối chứng vòng 1** (đúng lệnh trên nhưng thêm `--stage after`): `guard policy_pinned REFUND-v3` → `refund_clamped {asked 20000, entitled 0, db_delay 2}` → `gate issue_refund: deny` → `SỔ CÁI []`, `LỖI HÃNG []`, `GỬI HÃNG []`, `KẾT QUẢ: ĐẠT`.
 
 **Ví dụ (bộ nền, đừng chép):** `T-002@55` · sổ cái có dòng hoàn 20.000đ, hãng VNX nhận một lỗi, trong khi tracking ghi trễ 2 ngày ·
 khách không thấy gì sai, hãng chịu · cao · **lỗi chìm**. Nguồn: đầu vào (đặt sai trọng số cho con số khách tự khai). Xử lý:
