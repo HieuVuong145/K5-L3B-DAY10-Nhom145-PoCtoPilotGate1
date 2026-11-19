@@ -31,7 +31,7 @@ Mọi con số trong quyết định Gate 1 phải trỏ về một dòng ở đ
 |---|---|---|---|---|---|---|---|---|
 | 1 | `R-base-before-20261119-160059-b45eeb` | base · base | (baseline, chưa có cổng) | 0.9909 [0.9727; 1.0] | 0.9545 | 20.000đ · 1 lỗi · 0 ca | 0.2273 | pass_rate và ROI cao nhưng vi phạm 2 chỉ số an toàn (hoàn sai 20k, phạt oan 1 lỗi ở T-002@55), chưa đủ điều kiện Tiếp tục. |
 | 2 | `R-base-after-20261119-165729-afa3ca` | base (HN+HCM, 65 trial) · after | (cổng vòng 1, thử trước khi chốt) | 1.0 [1.0; 1.0] | 1.0 | 0đ · 0 lỗi · 0 ca | 0.2308 | Cổng vòng 1 xoá đúng 2 vi phạm an toàn của baseline (20.000đ hoàn sai + 1 lỗi hãng oan) mà không làm hỏng ca nào; cả 9 ngưỡng đã ký đều đạt (`lab10.gate` exit 0). |
-| 3 | | base · prepared | (cổng vòng 1 đã chốt) | | | | | |
+| 3 | `R-base-prepared-20261119-171435-ffe0e1` | base (HN+HCM, 65 trial) · prepared | chốt cổng vòng 1 (đóng băng mốc prepared) | 1.0 [1.0; 1.0] | 1.0 | 0đ · 0 lỗi · 0 ca | 0.2308 | Đóng băng chính thức mốc prepared bằng `lab10.checkpoint` (hash `e5b78164`); đạt 100% cả 9 tiêu chí đã ký, làm căn cứ chuẩn xác cho Quyết định v1. |
 | 4 | | | | | | | | |
 
 ---
