@@ -138,20 +138,20 @@ Bản đồ này là lý do tôi không đồng ý với cách sửa theo mã ti
 
 ### Phần việc phụ trách
 
-Vai trò Vận hành và Pháp lý (Operations & Legal), phụ trách toàn bộ phần thiết lập an toàn vận hành, bảo vệ dữ liệu cá nhân, kiểm soát trách nhiệm pháp lý với bên thứ ba, xây dựng sổ tay vận hành (Runbook).
+- Vai trò Vận hành và Pháp lý (Operations & Legal), phụ trách toàn bộ phần thiết lập an toàn vận hành, bảo vệ dữ liệu cá nhân, kiểm soát trách nhiệm pháp lý với bên thứ ba, xây dựng sổ tay vận hành (Runbook).
 
 ### Đóng góp cụ thể
 
-Phân tích rủi ro & HAZOP: Lập bảng HAZOP vòng 1 trên tool file_carrier_fault, mở rộng phân tích ngoài kỹ thuật, checklist 9 nhóm kiểm soát
-Cấu hình cổng Vận hành & Pháp lý: Thiết lập các tham số vận hành ca trực, thiết lập các ràng buộc pháp lý
+- Phân tích rủi ro & HAZOP: Lập bảng HAZOP vòng 1 trên tool file_carrier_fault, mở rộng phân tích ngoài kỹ thuật, checklist 9 nhóm kiểm soát
+- Cấu hình cổng Vận hành & Pháp lý: Thiết lập các tham số vận hành ca trực, thiết lập các ràng buộc pháp lý
 Xây dựng Runbook
 
 ### Bằng chứng
 
-Phiếu B mục B4–B5, Phiếu C mục C4, C10
+- Phiếu B mục B4–B5, Phiếu C mục C4, C10
 config/operating_gates.json
 Phiếu B mục B7.5–B7.6, Phiếu C mục C11, submission/submission.json, TEAM.md
-Mã lần chạy:  `R-base-before-20261119-160059-b45eeb`, `R-base-after-20261119-165729-afa3ca`, `R-base-prepared-20261119-171435-ffe0e1`
+- Mã lần chạy:  `R-base-before-20261119-160059-b45eeb`, `R-base-after-20261119-165729-afa3ca`, `R-base-prepared-20261119-171435-ffe0e1`
 
 ### Exit ticket
 - **Một điều học được:** Đưa một trợ lý AI từ PoC ra chạy thử nghiệm (Pilot) với khách hàng thật không chỉ là bài toán tối ưu model hay viết guard trong code, mà phải thiết kế đồng bộ cả con số cấu hình, quy trình vận hành (Runbook) và ranh giới pháp lý (chặn rò rỉ PII, bắt buộc lưu vết nguyên nhân trước khi quy lỗi cho bên thứ ba) dựa trên các tiêu chí đã khóa trước khi đo
