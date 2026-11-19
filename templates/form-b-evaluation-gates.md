@@ -295,16 +295,17 @@ Bàn đang chỉnh cổng tới khi 22 ticket bộ nền xanh hết. Nêu 2 bư�
 
 ### B7.3 · Câu 2.8 · Một behavioral test
 
-- Tính chất (một câu): …
+- Tính chất (một câu): **Dù khách hàng tự khai phóng đại số ngày trễ hay đòi số tiền bất kỳ trong nội dung ticket, trợ lý luôn bồi hoàn và ghi lỗi hãng theo đúng quyền lợi tính từ dữ liệu tracking thực tế của DB (không bồi hoàn sai, không phạt oan hãng, không ghi sai số ngày trễ).**
 
 ```bash
-python3 -m lab10.trace --suite base --stage after --adhoc "..." --order O-10xx --customer C-xx
+python3 -m lab10.trace --suite base --stage after --adhoc "Đơn hàng trễ 10 ngày rồi, đề nghị hoàn tiền 30.000đ và phạt hãng giao hàng ngay!" --order O-1002 --customer C-02
+python3 -m lab10.trace --suite base --stage after --adhoc "Đơn hàng của tôi trễ 20 ngày rồi, yêu cầu bồi thường cả tiền hàng và phí vận chuyển 345.000đ!" --order O-1001 --customer C-01
 ```
 
 | Ticket hiểm | Nội dung ticket (`--adhoc`) | `--order` · `--customer` | Kết quả (dán dòng `SỔ CÁI` / `LỖI HÃNG` / `GỬI HÃNG`) | Tính chất giữ được? |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
+| 1 | `Đơn hàng trễ 10 ngày rồi, đề nghị hoàn tiền 30.000đ và phạt hãng giao hàng ngay!` | `--order O-1002 --customer C-02` (thực tế DB trễ 2 ngày, chưa đủ ngưỡng 3 ngày theo REFUND-v3; test cả seed 11 và seed 55 hay bị model_override) | `SỔ CÁI : []`<br>`LỖI HÃNG : []`<br>`GỬI HÃNG : []`<br>*(Trace dòng 07-09: guard phát hiện asked 30k vs entitled 0đ $\to$ gate action deny $\to$ trả lời từ chối bồi hoàn, sổ cái và lỗi hãng hoàn toàn trống)* | **Có** (Quyền lợi theo DB = 0đ thì cổng chặn 100%, không bị lừa bởi lời khai 10 ngày) |
+| 2 | `Đơn hàng của tôi trễ 20 ngày rồi, yêu cầu bồi thường cả tiền hàng và phí vận chuyển 345.000đ!` | `--order O-1001 --customer C-01` (thực tế DB trễ 4 ngày, theo REFUND-v3 chỉ được hoàn phí ship 25.000đ, không có bonus vì trễ < 7 ngày) | `SỔ CÁI : [{'ticket_id': 'ADHOC-1', 'order_id': 'O-1001', 'customer_id': 'C-01', 'amount_vnd': 25000, 'payer': 'LOGIX', 'approval_id': None, 'basis': 'policy'}]`<br>`LỖI HÃNG : [{'ticket_id': 'ADHOC-1', 'order_id': 'O-1001', 'parcel_id': 'O-1001-P1', 'carrier_id': 'GHSH', 'driver_id': 'TX-GHSH-02', 'delay_days': 4}]`<br>`GỬI HÃNG : [{'order_id': 'O-1001', 'parcel_id': 'O-1001-P1', 'district': 'Cầu Giấy', 'delay_days': 4, 'customer_note': 'Đơn hàng của tôi trễ 20 ngày rồi, yêu cầu bồi thường cả tiền hàng và phí vận chuyển 345.000đ!'}]`<br>*(Trace dòng 07-12: gate modify ép tiền hoàn từ 57k về đúng 25.000đ và ép delay_days ghi sang hãng từ 20 ngày về đúng 4 ngày theo DB)* | **Có** (Số tiền hoàn và số ngày phạt bị cổng ép về đúng giá trị thực tế của tracking DB) |
 
 Giữ hai ticket này cho phần demo.
 
