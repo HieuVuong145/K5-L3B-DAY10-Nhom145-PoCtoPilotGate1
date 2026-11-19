@@ -26,8 +26,8 @@ rồi mới chạy đánh giá. Khối 1 không sửa code.
 
 ### Câu 1.2 · Mục tiêu nhìn từ hai người
 
-- Chị Oanh, kế toán đối soát (không dùng trợ lý, nhưng phải khớp sổ với hãng và shop mỗi tuần): …
-- Chị Hạnh, trưởng ca CSKH (phải duyệt những ca trợ lý chuyển sang): …
+- Chị Oanh, kế toán đối soát (không dùng trợ lý, nhưng phải khớp sổ với hãng và shop mỗi tuần): Khớp sổ sách 100% giữa sổ cái LogiX, đối tác vận chuyển và shop; không có khoản bồi hoàn sai lệch hoặc ghi nhận khống (`wrongful_refund_vnd = 0`, `refund_amount_correct >= 0.95`), không có lệnh phạt lỗi giao trễ oan cho hãng vận chuyển (`wrongful_carrier_faults = 0`) gây tranh chấp công nợ hàng tuần, và nội dung phản hồi khách phải khớp tuyệt đối số tiền thực tế ghi nhận trong sổ cái (`reply_matches_ledger = 1.0000`).
+- Chị Hạnh, trưởng ca CSKH (phải duyệt những ca trợ lý chuyển sang): Trợ lý tuyệt đối không tự ý vượt thẩm quyền/bỏ qua phê duyệt (`approval_bypass = 0`) với các đơn ngoài phạm vi, đơn có tranh chấp hoặc số tiền > 150.000đ; số ca chuyển sang duyệt thủ công không vượt quá công suất trực ca (6 ca/giờ/người, thời gian chờ xử lý tối đa $\le$ 60 phút theo `ops_facts`), và mỗi ca chuyển giao đều có tóm tắt lý do rõ ràng để người duyệt không mất công tra cứu lại từ đầu.
 
 ---
 
@@ -50,12 +50,12 @@ trợ lý có đang gây thiệt hại cho bên ngoài LogiX không; không có 
 
 | | Offline, cho MỘT bước (câu 1.3) | Telemetry production (câu 1.4) |
 |---|---|---|
-| **Bước / hành vi được đo** | | |
-| **Thước đo** (một câu, có đơn vị) | | |
-| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | | |
-| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | | |
-| **Khung thời gian / ngưỡng báo động** | (không áp dụng) | |
-| **Điểm mù** (thước đo này KHÔNG thấy gì) | | |
+| **Bước / hành vi được đo** | | Hành vi tự động ghi lỗi phạt cho hãng vận chuyển (`file_carrier_fault`) và tự động giải ngân hoàn tiền ra bên ngoài LogiX trong môi trường production khi chưa có nhãn. |
+| **Thước đo** (một câu, có đơn vị) | | Tỉ lệ khiếu nại tranh chấp lỗi phạt từ các đối tác vận chuyển (Disputed carrier strikes rate), đơn vị: %. |
+| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | | Log gọi tool `file_carrier_fault` tự động từ trợ lý và số lượng ticket khiếu nại đối soát công nợ từ cổng API đối tác hãng vận chuyển trong cơ sở dữ liệu production. |
+| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | | Tổng số lệnh phạt lỗi bị hãng khiếu nại thành công chia cho tổng số lệnh `file_carrier_fault` tự động mà trợ lý đã tạo trong chu kỳ. Nếu chu kỳ không có lệnh nào thì trả về 0%. |
+| **Khung thời gian / ngưỡng báo động** | (không áp dụng) | Khung thời gian: tính trượt theo chu kỳ 24 giờ (hàng ngày). Ngưỡng báo động: Tỉ lệ tranh chấp $> 2\%$ hoặc có $\ge 2$ khiếu nại trong 1 ngày từ cùng một hãng (chạm trần `max_auto_strikes_per_carrier_per_day` trong `ops_limits`). |
+| **Điểm mù** (thước đo này KHÔNG thấy gì) | | Không ghi nhận được các lỗi phạt oan có giá trị nhỏ mà hãng vận chuyển chấp nhận bỏ qua vì chi phí làm thủ tục khiếu nại cao hơn tiền phạt, làm ẩn đi các sai sót nhỏ mang tính hệ thống. |
 
 **Ví dụ mẫu (bước "chọn độ trễ" của agent, đừng chép):**
 Thước đo: tỉ lệ lần chạy mà độ trễ agent dùng để tính tiền khác độ trễ theo tracking DB. Dữ liệu: sự kiện `proposal.delay_days_used`
@@ -73,9 +73,9 @@ nhau chia cho số lần chạy có sự kiện `proposal`; lần chạy không 
 
 ### Câu 1.5 · Chọn MỘT kết luận và giải thích một câu
 
-Số minh hoạ trong đề (không phải số của bàn). Khoanh: **(a) · (b) · (c) · (d)**
+Số minh hoạ trong đề (không phải số của bàn). Khoanh: **(b)**
 
-Giải thích một câu: …
+Giải thích một câu: Giá trị điểm pass_rate = 1.0 của bản Y nằm hoàn toàn bên trong khoảng tin cậy 95% [0.9400; 1.0] của bản X, do đó sự chênh lệch 1 lần chạy chưa có ý nghĩa thống kê và chưa đủ căn cứ để khẳng định Y thực sự vượt trội hơn X.
 
 ---
 
