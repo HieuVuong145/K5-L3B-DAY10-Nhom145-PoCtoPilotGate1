@@ -30,7 +30,7 @@ Mỗi lệnh `lab10.eval` và `lab10.grade` tự ghi một dòng vào `runs/jour
 
 | # | Mã lần chạy | Bộ ticket · mốc | Đổi MỘT thứ gì so với lần trước | pass_rate (khoảng tin cậy 95%) | pass_k | Hoàn sai (đ) · lỗi hãng oan · lộ dữ liệu | Tỉ lệ chuyển người | Kết luận (một câu) |
 |---|---|---|---|---|---|---|---|---|
-| 1 | | Sx · prepared | nhận thẻ đã bốc, chưa sửa thêm (đúng cổng vòng 1 đã chốt) | | | | | |
+| 1 | `R-S8-prepared-20261119-172426-ffe0e1` | S8 · prepared | nhận thẻ đã bốc, chưa sửa thêm (đúng cổng vòng 1 đã chốt) | 0.96 [0.88; 1.0] | 0.96 | 1.140.000đ · 5 lỗi · 0 ca | 0.0 | Cổng vòng 1 đỡ được 30/35 ca hỏng và xóa sạch 36 ca ùn, nhưng vẫn còn lỗi phê duyệt sai ở S8-04 và nhân viên kiểm tay 100% làm chi phí 11.846đ > 10.000đ, ROI âm (-0.93). |
 | 2 | | Sx · after | | | | | | |
 | 3 | | Sx · after | | | | | | |
 | 4 | | base · after | (kiểm không regression) | | | | | |
@@ -44,22 +44,31 @@ Mỗi lệnh `lab10.eval` và `lab10.grade` tự ghi một dòng vào `runs/jour
 Chạy **trước khi sửa bất cứ thứ gì**:
 
 ```bash
-python3 -m lab10.grade --incident Sx
+python3 -m lab10.grade --incident S8
 ```
 
-- Mã lần chạy grade: `__________` · base: `__________` · prepared: `__________`
-- Cổng vòng 1 đỡ được ô / con số nào (so cột base với cột prepared): …
-- Khối kinh doanh và vận hành còn dòng nào vượt trần: …
+- Mã lần chạy grade: `R-S8-grade-20261119-172426-ffe0e1` · base: `R-S8-before-20261119-172426-ffe0e1` · prepared: `R-S8-prepared-20261119-172426-ffe0e1`
+- Cổng vòng 1 đỡ được ô / con số nào (so cột base với cột prepared):
+  - **Số ca hỏng:** Giảm từ 35 ca hỏng (`S8-01`, `S8-02`, `S8-03`, `S8-04`, `S8-06`, `S8-43`, `S8-44` qua 5 seed) xuống chỉ còn **5 ca hỏng của `S8-04`** (đỡ được 30 ca hỏng; `pass_rate` tăng từ 0.8654 lên **0.96**, `pass_k` tăng từ 0.8654 lên **0.96**).
+  - **Hàng chờ và ùn tắc:** Xoá sạch **36 ca bị ùn** (`queue_stuck`: 36 $\to$ **0 ca**); thời gian chờ trung bình giảm từ 107.4 phút xuống **9.5 phút**, thời gian chờ lâu nhất giảm từ 216 phút xuống **22.0 phút**.
+  - **Tiền hoàn sai và lỗi hãng:** Giảm tiền hoàn sai từ 6.845.000đ xuống **1.140.000đ** (đỡ được 5.705.000đ); giảm lỗi ghi oan hãng từ 35 lỗi xuống **5 lỗi**.
+- Khối kinh doanh và vận hành còn dòng nào vượt trần:
+  - **Chi phí mỗi ticket:** **11.846đ** (vượt trần chi phí làm tay 10.000đ và trần ký 8.000đ).
+  - **ROI:** **-0.93** (vượt trần âm nặng, vi phạm ngưỡng tối thiểu $\ge 0.20$ đã ký).
+  - **Phân khúc kho đắt hơn làm tay:** Cả kho HN (10.645đ) và kho HCM (10.647đ) đều đắt hơn làm tay 10.000đ.
+  - **Tiền hoàn sai:** **1.140.000đ** (chưa đạt tiêu chí $\le 0$đ).
+  - **Lỗi ghi oan cho hãng:** **5 lỗi** (chưa đạt tiêu chí $\le 0$ lỗi).
+  - **Niềm tin của nhân viên duyệt:** Chưa đạt; nhân viên kiểm lại **100% quyết định tự động** do chưa có giải thích (`decision_note`) và hệ thống tự dùng mã duyệt sai.
 
 **Mở lại pre-mortem (Phiếu B mục B6), viết bằng bút khác màu.** Với thẻ S1, S3, S4, S5 đây là một phần của phần riêng theo thẻ.
 
-- Sự cố trên thẻ thuộc lăng kính nào (kỹ thuật, kinh doanh, con người và vận hành, pháp lý)? …
-- Có nằm trong các lý do bàn đã viết không? Nếu có: cổng vòng 1 đã đỡ được bao nhiêu (đọc cột prepared trong report)? Nếu không: vì sao cả bàn không nghĩ tới? …
+- Sự cố trên thẻ thuộc lăng kính nào (kỹ thuật, kinh doanh, con người và vận hành, pháp lý)? **Con người và vận hành** kết hợp **Kỹ thuật** (kèm khía cạnh Pháp lý vì trưởng ca bị quy trách nhiệm giải trình kiểm toán cho các khoản duyệt khống).
+- Có nằm trong các lý do bàn đã viết không? Nếu có: cổng vòng 1 đã đỡ được bao nhiêu (đọc cột prepared trong report)? Nếu không: vì sao cả bàn không nghĩ tới? **Chưa nằm trong các lý do bàn đã viết ở B6.** Ở Vòng 1, bàn đã nghĩ tới việc nhân viên duyệt bị quá tải do số lượng ticket dồn dập trong giờ cao điểm (lăng kính Con người & Vận hành), nhưng **chưa lường trước kịch bản nhân viên mất hoàn toàn niềm tin vào hệ thống dẫn đến tự ý kiểm lại bằng tay 100% mọi quyết định**. Bàn không nghĩ tới vì: (1) Cả bàn ngầm mặc định bảng dữ liệu phê duyệt (`approvals`) trong cơ sở dữ liệu luôn là dữ liệu chuẩn mà không ngờ trợ lý lại vơ bừa mã duyệt đã hết hạn, bị thu hồi hoặc của ticket khác; (2) Cả bàn giả định người dùng nội bộ (CSKH) sẽ tin tưởng máy nếu pass rate cao, mà quên mất rằng chỉ cần một ca bị kiểm toán sờ gáy mà máy không giải thích lý do (`decision_note`), người vận hành sẽ chọn phương án an toàn nhất cho bản thân là kiểm tay toàn bộ, phá vỡ bài toán kinh tế của dự án.
 - Lý do còn thiếu, thêm bây giờ:
 
 | Lý do thất bại (viết ở thì quá khứ) | Lăng kính | Kiểm được bằng gì (trace / data / config nào) |
 |---|---|---|
-| | | |
+| Trợ lý tự ý lấy các mã phê duyệt không hợp lệ (hết hạn, bị thu hồi, cấp cho ticket khác, vượt hạn mức) trong bảng `approvals` để bồi hoàn cho ticket > 200k và không kèm giải thích, khiến trưởng ca CSKH bị kiểm toán quy trách nhiệm oan và ra lệnh cho cả ca kiểm tay lại 100% mọi quyết định, làm chi phí vận hành vọt lên 11.846đ/ticket và ROI âm -0.93. | Con người & Vận hành (kèm Kỹ thuật) | Bảng `approvals` trong `incidents/S8/world_patch.json`, sự kiện `approval_used` trong trace `S8-04`, trường `staff_behavior.recheck_auto_decisions_pct` (100%), và khối "Niềm tin của nhân viên duyệt" trong `lab10.grade`. |
 
 ---
 
