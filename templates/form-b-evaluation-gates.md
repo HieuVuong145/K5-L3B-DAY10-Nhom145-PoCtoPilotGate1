@@ -1,6 +1,6 @@
 # Phiếu B · Đo, rủi ro, cổng vòng 1 và quyết định v1 · Khối 2A + 2B + chốt (phút 65–115)
 
-**Bàn:** ______
+**Bàn:** K5-L3B-DAY10-Nhom145
 
 Tiêu chí đã ký ở Phiếu A. Từ phút 65 bàn mới được chạy trợ lý. Khối 2A (65–85) chưa sửa code hay config. Khối 2B (85–105) sửa
 `lab10/guards.py` và `config/operating_gates.json`. Phút 105–115 chốt cổng vòng 1 rồi viết quyết định v1. Sau phút 115 không sửa phiếu này
@@ -29,7 +29,7 @@ Mọi con số trong quyết định Gate 1 phải trỏ về một dòng ở đ
 
 | # | Mã lần chạy | Bộ ticket · mốc | Đổi MỘT thứ gì so với lần trước | pass_rate (khoảng tin cậy 95%) | pass_k | Hoàn sai (đ) · lỗi hãng oan · lộ dữ liệu | Tỉ lệ chuyển người | Kết luận (một câu) |
 |---|---|---|---|---|---|---|---|---|
-| 1 | | base · base | (baseline, chưa có cổng) | | | | | |
+| 1 | `R-base-before-20261119-160059-b45eeb` | base · base | (baseline, chưa có cổng) | 0.9909 [0.9727; 1.0] | 0.9545 | 20.000đ · 1 lỗi · 0 ca | 0.2273 | pass_rate và ROI cao nhưng vi phạm 2 chỉ số an toàn (hoàn sai 20k, phạt oan 1 lỗi ở T-002@55), chưa đủ điều kiện Tiếp tục. |
 | 2 | | base · after | (cổng vòng 1, thử trước khi chốt) | | | | | |
 | 3 | | base · prepared | (cổng vòng 1 đã chốt) | | | | | |
 | 4 | | | | | | | | |
@@ -45,18 +45,18 @@ python3 -m lab10.eval --suite base --stage base --note "baseline"
 python3 -m lab10.gate --run runs/<mã lần chạy>/report.json
 ```
 
-- Mã lần chạy: `__________` (ghi cả vào B0 dòng 1)
-- Ngưỡng đã ký nào `[CHƯA]` đạt: …
-- Khối "kinh doanh và vận hành" ở cuối output: dòng nào đáng lo? …
-- Khối "theo kho và hãng": kho hoặc hãng nào có số xấu nhất? …
+- Mã lần chạy: `R-base-before-20261119-160059-b45eeb` (ghi cả vào B0 dòng 1)
+- Ngưỡng đã ký nào `[CHƯA]` đạt: `wrongful_refund_vnd ≤ 0` (thực tế 20.000đ) và `wrongful_carrier_faults ≤ 0` (thực tế 1 lỗi).
+- Khối "kinh doanh và vận hành" ở cuối output: dòng nào đáng lo? Dòng chi phí ở phân khúc kho chưa rõ (`?`): chi phí lên tới 10.359đ/ticket, cao hơn chi phí làm tay 10.000đ (`worse_than_manual: true`) do tỉ lệ chuyển người duyệt tại phân khúc này là 100%.
+- Khối "theo kho và hãng": kho hoặc hãng nào có số xấu nhất? Kho HCM (pass_rate 0.96, hoàn sai 20.000đ, phạt oan 1 lỗi hãng) và kho `?` (chi phí > làm tay); Hãng VNX (pass_rate 0.9714, gánh toàn bộ 20.000đ hoàn sai và 1 lỗi phạt oan).
 
 **Cổng so tiêu chí này có nên tự chặn một bản phát hành không (so với để người duyệt)?**
 
 | Lý lẽ ủng hộ tự chặn | Lý lẽ phản đối |
 |---|---|
-| | |
+| Đảm bảo an toàn tài chính và pháp lý tuyệt đối cho LogiX; chặn đứng nguy cơ thất thoát dòng tiền (hoàn sai) và rủi ro bị hãng vận chuyển khởi kiện/cắt hợp đồng vì bị phạt oan. | Quá cứng nhắc, có thể chặn oan các bản phát hành chỉ bị lỗi nhẹ ở 1 phân khúc nhỏ có thể xử lý được bằng cách thu hẹp phạm vi (ví dụ: cắt kho HCM). |
 
-Khuyến nghị (khoanh một): **tự chặn · người duyệt · kết hợp**. Vì: …
+Khuyến nghị (khoanh một): **kết hợp**. Vì: Tự động chặn cứng (hard blocking) đối với các vi phạm an toàn tài chính, pháp lý và rò rỉ dữ liệu (`wrongful_refund > 0`, `pii_leaks > 0`); chuyển người duyệt đánh giá linh hoạt với các ngưỡng năng lực kinh doanh/vận hành (`pass_rate`, chi phí, SLA hàng chờ).
 
 ---
 
