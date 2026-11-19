@@ -25,8 +25,8 @@
       "khi hàng chờ vượt quá 60 phút (queue_stuck > 0) thì gọi thêm 1 người trực dự phòng hoặc thu hẹp phạm vi pilot"
     ],
     "alert_channel": "#ops-cskh",
-    "decision_note": false,
-    "review_sampling_pct": 0
+    "decision_note": true,
+    "review_sampling_pct": 10
   },
   "legal": {
     "pii_fields_blocked_to_third_party": [

@@ -19,7 +19,29 @@ def escalation_rate(trials):
     return sum(t["status"] == "escalated" for t in trials) / max(1, len(trials))
 
 
+def cskh_recheck_rate(trials):
+    """Tỉ lệ ticket mà nhân viên CSKH phải kiểm tra lại bằng tay (recheck).
+    Trên bộ nền (base) giá trị là 0 (hoặc 10% khi kiểm mẫu).
+    Trên gói sự cố S8 mốc base/before giá trị là 100% (nhân viên mất niềm tin kiểm tay toàn bộ).
+    """
+    return round(sum(t.get("review_kind") == "recheck" for t in trials) / max(1, len(trials)), 4)
+
+
+def invalid_approval_rate(trials):
+    """Tỉ lệ ticket phát sinh sự kiện hoặc lỗi liên quan đến phê duyệt (approval).
+    Bắt được các ca dùng approval hết hạn, bị thu hồi, sai ticket, hoặc chi vượt max_vnd.
+    """
+    count = 0
+    for t in trials:
+        events = t.get("events", [])
+        if any(e.get("type") == "approval_used" for e in events) or any("phê duyệt" in str(e.get("reason", "")) for e in events):
+            count += 1
+    return round(count / max(1, len(trials)), 4)
+
+
 MONITORS = {
     "escalation_rate": escalation_rate,     # có sẵn; KHÔNG tính là metric mới của đội
+    "cskh_recheck_rate": cskh_recheck_rate,
+    "invalid_approval_rate": invalid_approval_rate,
 }
 STARTER_MONITORS = ("escalation_rate",)

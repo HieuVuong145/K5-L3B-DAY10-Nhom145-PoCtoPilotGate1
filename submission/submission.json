@@ -1,12 +1,17 @@
 {
-  "team": "",
-  "members": [],
-  "incident": "",
-  "decision_v1": "",
-  "decision_v2": "",
+  "team": "K5-L3B-DAY10-Nhom145-PoCtoPilotGate1",
+  "members": [
+    "Vương Toàn Minh Hiếu - 2A202603853",
+    "Vũ Quang Thanh - 2A202603736",
+    "Nguyễn Đình Trường - 2A202603837",
+    "Nguyễn Mạnh Cường - 2A202603904"
+  ],
+  "incident": "S8",
+  "decision_v1": "Tiếp tục",
+  "decision_v2": "Tiếp tục",
   "three_lines": {
-    "environment_assumption": "",
-    "reduce_or_prevent": "",
-    "measure_in_pilot": ""
+    "environment_assumption": "Đội giả định rằng nhân viên CSKH sẽ luôn tin tưởng và tuân thủ quy trình kiểm mẫu 10% khi hệ thống có ghi chú giải thích, tuy nhiên ngoài thực tế nếu phát sinh bất kỳ tranh chấp pháp lý cá nhân nào dù nhỏ, nhân viên có thể hoảng sợ và tự phát quay lại kiểm tay 100% để tự bảo vệ.",
+    "reduce_or_prevent": "Gate của đội thực sự NGĂN được tác hại vì lệnh bồi hoàn tiền trên hạn mức tự động chỉ được thực thi khi mã phê duyệt thoả mãn toàn diện 6 điều kiện chặt chẽ (đúng ticket, đúng đơn, còn hạn, còn hiệu lực, đúng hạn mức, đúng người duyệt); mọi trường hợp không khớp đều bị chặn đứng trước lệnh ghi sổ và chuyển thẳng sang hàng chờ người duyệt thật.",
+    "measure_in_pilot": "Cần đo lường lại tỉ lệ tuân thủ kiểm mẫu thực tế của nhân viên CSKH (cskh_recheck_rate), thời gian xử lý thực tế của một ca giải trình bồi hoàn có kèm decision_note, và độ biến động số lượng ticket khiếu nại trong các khung giờ cao điểm thật."
   }
 }

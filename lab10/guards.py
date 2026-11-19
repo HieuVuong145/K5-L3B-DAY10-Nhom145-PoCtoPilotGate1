@@ -99,7 +99,38 @@ def _refund_gate(ctx, action):
     entitled = H.entitlement_vnd(policy, order, db_delay, cause)
     asked = int(action.get("amount_vnd") or 0)
 
+    # (c) Xác thực phê duyệt (Approval Verification - Vòng 2 cho S8)
+    app_id = action.get("approval_id")
+    if app_id:
+        cands = ctx.tools.lookup_approvals(approval_id=app_id)
+        if not cands:
+            return Verdict.escalate("cổng hoàn tiền: phê duyệt %s không tồn tại trong hệ thống" % app_id)
+        app = cands[0]
+        if app.get("ticket_id") != ctx.ticket.get("ticket_id"):
+            ctx.log("approval_wrong_ticket", approval_id=app_id, ticket_id=ctx.ticket.get("ticket_id"), app_ticket_id=app.get("ticket_id"))
+            return Verdict.escalate("cổng hoàn tiền: phê duyệt %s cấp cho ticket %s, không hợp lệ cho ticket %s"
+                                    % (app_id, app.get("ticket_id"), ctx.ticket.get("ticket_id")))
+        if app.get("order_id") != order_id:
+            return Verdict.escalate("cổng hoàn tiền: phê duyệt %s cấp cho đơn %s, không hợp lệ cho đơn %s"
+                                    % (app_id, app.get("order_id"), order_id))
+        if app.get("status") != "valid":
+            return Verdict.escalate("cổng hoàn tiền: phê duyệt %s không còn hiệu lực (trạng thái: %s)"
+                                    % (app_id, app.get("status")))
+        if app.get("expires_at", "") < ctx.as_of:
+            return Verdict.escalate("cổng hoàn tiền: phê duyệt %s đã hết hạn ngày %s (ngày xử lý: %s)"
+                                    % (app_id, app.get("expires_at"), ctx.as_of))
+        if asked > app.get("max_vnd", 0):
+            return Verdict.escalate("cổng hoàn tiền: số tiền hoàn %dđ vượt hạn mức phê duyệt %dđ của %s"
+                                    % (asked, app.get("max_vnd", 0), app_id))
+        expected_approver = ctx.gates.get("operations", {}).get("approver_id")
+        if expected_approver and app.get("approver_id") != expected_approver:
+            return Verdict.escalate("cổng hoàn tiền: người duyệt %s không đúng thẩm quyền quy định (%s)"
+                                    % (app.get("approver_id"), expected_approver))
+
     if asked == entitled:
+        if entitled > policy["auto_limit_vnd"] and not app_id:
+            return Verdict.escalate("cổng hoàn tiền: quyền lợi %dđ vượt hạn mức tự động %dđ, cần người duyệt"
+                                    % (entitled, policy["auto_limit_vnd"]))
         return Verdict.allow()
 
     ctx.log("refund_clamped", order_id=order_id, asked_vnd=asked, entitled_vnd=entitled,
@@ -108,7 +139,7 @@ def _refund_gate(ctx, action):
     if entitled <= 0:
         return Verdict.deny("cổng hoàn tiền: quyền lợi tính từ tracking DB = 0 "
                             "(trễ %d ngày, lý do %s)" % (db_delay, cause))
-    if entitled > policy["auto_limit_vnd"] and not action.get("approval_id"):
+    if entitled > policy["auto_limit_vnd"] and not app_id:
         return Verdict.escalate("cổng hoàn tiền: quyền lợi %dđ vượt hạn mức tự động %dđ, cần người duyệt"
                                 % (entitled, policy["auto_limit_vnd"]))
 
