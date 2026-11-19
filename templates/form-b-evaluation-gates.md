@@ -377,15 +377,15 @@ Mỗi dòng một tín hiệu. Cột "Lấy ở đâu" phải là một dòng tr
 
 ### B7.6 · Giờ cao điểm (bắt buộc với thẻ S4; các thẻ khác nên có)
 
-Lượng ticket có thể dồn gấp ba trong một giờ (ngày sale, sau bão). Viết trước, khi chưa biết sự cố.
+*Không áp dụng (nhóm làm thẻ S8; mục này chỉ bắt buộc với thẻ S4).*
 
 | Câu hỏi | Trả lời (có số, có tên) |
 |---|---|
-| Giờ cao điểm là khi nào, bao nhiêu ticket mỗi giờ (dựa vào `ops_facts`)? | Khung giờ flash sale (11h–13h và 20h–22h) hoặc ngày bão/lũ lụt gây trễ diện rộng; lượng ticket khiếu nại có thể dồn tới **12–18 ticket/giờ** (gấp 3 lần ngày thường $\approx 4$–$6$ ticket/giờ toàn hệ thống; riêng 2 kho HN+HCM dồn $\approx 7$–$10$ ticket/giờ). |
-| Ai trực giờ cao điểm, mấy người (khớp `operations.reviewers_on_shift`)? | Ca bình thường có **1 người trực duyệt** (`reviewers_on_shift = 1`, công suất 6 ca/giờ do Trần Thị Hạnh `NV-HANH` phân công). Giờ cao điểm có cơ chế điều động thêm **1 người trực dự phòng** (`reviewers_on_shift = 2`, nâng tổng công suất lên 12 ca/giờ). |
-| Ngưỡng nào thì **gọi thêm người** (hàng chờ bao nhiêu ca, chờ lâu nhất bao nhiêu phút)? Ai gọi? | Khi hàng chờ tích luỹ $\ge 4$ ca chưa duyệt hoặc thời gian chờ của ca lâu nhất $\ge 30$ phút. Người gọi: Trưởng ca **Trần Thị Hạnh (`NV-HANH`)** thông qua kênh `#ops-cskh` hoặc hotline ca trực. |
-| Ngưỡng nào thì **thu hẹp** phạm vi (khoá `business.pilot_scope`) hoặc **tắt** một thao tác ghi (`config/switches.json`)? Ai quyết? | Khi đã gọi người dự phòng mà hàng chờ vẫn $\ge 6$ ca hoặc thời gian chờ chạm ngưỡng 50 phút (nguy cơ vỡ SLA 60 phút): thu hẹp `business.pilot_scope` về riêng kho `["HN"]`. Nếu phát hiện lỗi hoàn sai: tắt `issue_refund`. Người quyết: **Lê Thanh Tùng (`NV-TUNG`)** thống nhất cùng **Trần Thị Hạnh (`NV-HANH`)**. |
-| Thêm người thì chi phí mỗi ticket và ROI thay đổi thế nào (đọc report)? | Mỗi người trực thêm tốn phí giữ chỗ `reviewer_standby_fee_vnd = 30.000`đ/ca (theo `ops_facts`). Với 13 ticket/ngày: thêm 1 người trực làm chi phí tăng thêm 30.000đ $\implies$ chi phí/ticket tăng từ **5.165đ lên ~7.472đ** (vẫn đạt $\le 8.000$đ trong Bản tiêu chí); ROI giảm từ **0.94 xuống ~0.35** (vẫn đạt $\ge 0.20$). Đổi lại, hàng chờ giảm về 0 phút và triệt tiêu nguy cơ vi phạm SLA (`queue_stuck = 0`). |
+| Giờ cao điểm là khi nào, bao nhiêu ticket mỗi giờ (dựa vào `ops_facts`)? | |
+| Ai trực giờ cao điểm, mấy người (khớp `operations.reviewers_on_shift`)? | |
+| Ngưỡng nào thì **gọi thêm người** (hàng chờ bao nhiêu ca, chờ lâu nhất bao nhiêu phút)? Ai gọi? | |
+| Ngưỡng nào thì **thu hẹp** phạm vi (khoá `business.pilot_scope`) hoặc **tắt** một thao tác ghi (`config/switches.json`)? Ai quyết? | |
+| Thêm người thì chi phí mỗi ticket và ROI thay đổi thế nào (đọc report)? | |
 
 ---
 
